@@ -1,0 +1,54 @@
+﻿@page "/Sistema/Eliminar/{SistemaId:int}"
+﻿
+@inject SistemaService sistemaService
+@inject NavigationManager navigationManager
+
+<PageTitle>Eliminar Sistema</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5 class="card-title">Eliminar Sistema</h5>
+        </div>
+
+        <div class="card-body text-center">
+            <p>¿Está seguro de que desea eliminar al técnico <strong>@Sistema?.Descripcion</strong>?</p>
+            <p>Esta acción no se puede deshacer.</p>
+            <ValidationMessage For="(() => Message)" />
+        </div>
+
+        <div class="card-footer text-center mt-2">
+            <a href="/Tecnico/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+            <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int SistemaId { get; set; }
+
+    public Sistema Sistema { get; set; } = new Sistema();
+    public string? Message { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sistema = await sistemaService.Buscar(SistemaId);
+    }
+
+    private async Task Eliminar()
+    {
+        var eliminado = await sistemaService.Eliminar(Sistema.SistemaId);
+
+        if (eliminado)
+        {
+            Message = "Se ha eliminado correctamente";
+            
+            navigationManager.NavigateTo("/Sistema/Index");
+        }
+        else
+        {
+            Message = "No se ha podido eliminar correctamente";
+        }
+    }
+}

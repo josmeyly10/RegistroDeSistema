@@ -1,0 +1,118 @@
+﻿@page "/Sistema/Edit/{SistemaId:int}"
+@inject SistemaService sistemaService
+@rendermode InteractiveServer
+@inject NavigationManager navigationManager
+
+@*HTML*@
+<PageTitle>Create</PageTitle>
+<EditForm Model="Sistema" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Sistemas</h5>
+            </div>
+
+            <div class="card-body ">
+
+
+                @*Descripcion*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Descripcion</strong></label>
+                    <InputText class="form-control" @bind-Value="Sistema.Descripcion"></InputText>
+                    <ValidationMessage For="(() => Sistema.Descripcion)" />
+                </div>
+                
+                </div>
+                @*Complejidad*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Complejidad</strong></label>
+                    <InputText class="form-control" @bind-Value="Sistema.Complejidad"></InputText>
+                    <ValidationMessage For="(() => Sistema.Complejidad)" />
+
+               
+            </div>
+
+            @*footer*@
+            <div class="card-footer text-center mt-2">
+                <a href="/Sistema/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+                <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+
+@code {
+    [Parameter]
+    public int SistemaId { get; set; }
+
+    public Sistema Sistema  { get; set; } = new Sistema();
+
+    public string? Message { get; set; } = string.Empty;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sistema = await sistemaService.Buscar(SistemaId);
+
+    }
+
+
+    public async Task Guardar()
+    {
+        if (await Validar())
+        {
+            Message = " ya existe un sistema con este nombre";
+            return;
+        }
+        var crear = await sistemaService.Guardar(Sistema);
+
+        if (crear)
+        {
+            Message = "se ha creado";
+            Volver();
+        }
+        else
+        {
+            Message = " no se ha podido crear ";
+        }
+    }
+    private async Task<bool> Validar()
+    {
+        var existe = await sistemaService.ExisteSistema(Sistema.SistemaId, Sistema.Descripcion);
+        return existe;
+    }
+
+    public void Volver()
+    {
+        navigationManager.NavigateTo("/Sistema/Index");
+    }
+
+    public void Nuevo()
+    {
+        this.Sistema = new Sistema();
+
+    }
+
+    private async Task Eliminar()
+    {
+        var eliminado = await sistemaService.Eliminar(Sistema.SistemaId);
+
+        if (eliminado)
+        {
+            Message = "Se ha eliminado correctamente";
+            Volver();
+        }
+        else
+        {
+            Message = "No se ha podido eliminar correctamente";
+        }
+    }
+}
+
